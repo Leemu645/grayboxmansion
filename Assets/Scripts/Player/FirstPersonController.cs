@@ -24,9 +24,11 @@ namespace GrayBoxMansion
         [SerializeField] Transform viewCamera;
 
         [Header("Movement")]
+        [Tooltip("Meters per second. The creature's patrol is slower than this, and its chase is faster.")]
         [Min(0f)]
         [SerializeField] float moveSpeed = 4.4f;
 
+        [Tooltip("Meters per second while sprinting. The creature's chase stays under this.")]
         [Min(0f)]
         [SerializeField] float sprintSpeed = 7f;
 

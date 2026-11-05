@@ -107,6 +107,7 @@ namespace GrayBoxMansion.Editor
             BuildInteractionUi(player, actions);
             BuildAudio();
             BakeNavMesh(player);
+            BuildMonster();
 
             EditorSceneManager.MarkSceneDirty(scene);
             bool saved = EditorSceneManager.SaveScene(scene, ScenePath);
@@ -127,7 +128,7 @@ namespace GrayBoxMansion.Editor
             Debug.Log("Built " + ScenePath + " and added it to Build Settings. Press Play. You start in the foyer.");
             EditorUtility.DisplayDialog(
                 "Mansion built",
-                "Assets/Scenes/Mansion is open and listed in Build Settings.\n\nPress Play. You start in the foyer.\nWASD to walk, mouse to look, E to use, F for the flashlight.\n\nThe solution is in SETUP.md, under the spoiler heading.",
+                "Assets/Scenes/Mansion is open and listed in Build Settings.\n\nPress Play. You start in the foyer.\nWASD to walk, mouse to look, E to use, F for the flashlight.\n\nA limping creature patrols both floors. It starts upstairs and will not notice you for a few seconds. Walking away from it loses. Sprinting away gains ground.\n\nThe relic solution is in SETUP.md, under the spoiler heading.",
                 "OK");
         }
 
@@ -374,6 +375,7 @@ namespace GrayBoxMansion.Editor
             AssignClips(serialized, "lockUnlock", "lock_unlock_01.ogg", "lock_unlock_02.ogg");
             AssignClip(serialized, "lockRattle", "lock_rattle.wav");
             AssignClip(serialized, "slotFill", "slot_fill.wav");
+            AssignClip(serialized, "scareSting", "scare_sting.wav");
             SerializedProperty master = serialized.FindProperty("masterVolume");
             if (master != null)
                 master.floatValue = 0.85f;
@@ -387,6 +389,68 @@ namespace GrayBoxMansion.Editor
             bed.spatialBlend = 0f;
             bed.dopplerLevel = 0f;
             bed.priority = 64;
+        }
+
+        static void BuildMonster()
+        {
+            // Both floors, starting upstairs so the player in the foyer is not in sight.
+            // Study and master bedroom are omitted: those doors start locked.
+            Vector3[] marks =
+            {
+                new Vector3(-6.4f, 3.65f, -5.4f),
+                new Vector3(-8.7f, 3.65f, 4.8f),
+                new Vector3(-5.6f, 3.65f, 1.4f),
+                new Vector3(-2.55f, 3.65f, 0.5f),
+                new Vector3(0f, 3.65f, -4.3f),
+                new Vector3(5.5f, 3.65f, 0.5f),
+                new Vector3(8.5f, 3.65f, 0.6f),
+                new Vector3(6.2f, 3.65f, -6.4f),
+                new Vector3(0f, 0.08f, 3.5f),
+                new Vector3(-7.1f, 0.08f, 6.5f),
+                new Vector3(-8.6f, 0.08f, 1.5f),
+                new Vector3(-6.2f, 0.08f, -5.2f),
+                new Vector3(0.2f, 0.08f, -6.5f),
+                new Vector3(7.1f, 0.08f, -3.2f),
+                new Vector3(2.5f, 0.08f, -0.2f),
+                new Vector3(0.4f, 0.08f, 6.4f),
+            };
+
+            Transform route = Group("PatrolRoute");
+            Transform[] points = new Transform[marks.Length];
+            for (int i = 0; i < marks.Length; i++)
+            {
+                GameObject mark = new GameObject("Point" + (i + 1));
+                mark.transform.SetParent(route, false);
+                mark.transform.position = marks[i];
+                points[i] = mark.transform;
+            }
+
+            GameObject creature = new GameObject("Monster");
+            creature.transform.position = marks[0];
+            NavMeshAgent agent = creature.AddComponent<NavMeshAgent>();
+            agent.enabled = false;
+
+            MansionMonster monster = creature.AddComponent<MansionMonster>();
+            GameObject ending = new GameObject("GameOver");
+            GameOverSequence sequence = ending.AddComponent<GameOverSequence>();
+
+            SerializedObject serialized = new SerializedObject(monster);
+            SerializedProperty list = serialized.FindProperty("patrolPoints");
+            list.arraySize = points.Length;
+            for (int i = 0; i < points.Length; i++)
+                list.GetArrayElementAtIndex(i).objectReferenceValue = points[i];
+            serialized.FindProperty("patrolSpeed").floatValue = 2.6f;
+            serialized.FindProperty("chaseSpeed").floatValue = 5.5f;
+            serialized.FindProperty("patrolAcceleration").floatValue = 5.5f;
+            serialized.FindProperty("chaseAcceleration").floatValue = 7.5f;
+            serialized.FindProperty("viewAngle").floatValue = 80f;
+            serialized.FindProperty("viewDistance").floatValue = 12f;
+            serialized.FindProperty("loseSightGrace").floatValue = 0.4f;
+            serialized.FindProperty("searchDuration").floatValue = 4.5f;
+            serialized.FindProperty("awarenessDelay").floatValue = 8f;
+            serialized.FindProperty("catchDistance").floatValue = 1.35f;
+            serialized.FindProperty("gameOver").objectReferenceValue = sequence;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
         static void BakeNavMesh(GameObject player)
