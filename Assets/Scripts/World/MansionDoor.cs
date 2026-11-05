@@ -23,13 +23,56 @@ namespace GrayBoxMansion
         float targetAngle;
         bool unlocked;
         bool released;
+        Collider panelCollider;
 
         public bool IsOpen => targetAngle != 0f;
+
+        /// <summary>
+        /// The creature may push this open. Locked doors and the sealed front door stay shut,
+        /// so it cannot walk the player into a room the puzzle has not opened.
+        /// </summary>
+        public bool AllowsMonsterThrough => unlocked && (!sealedUntilForced || released);
+
+        /// <summary>
+        /// True once the slab has swung most of the way, not merely once opening has started.
+        /// </summary>
+        public bool IsPassageClear
+        {
+            get
+            {
+                float span = Mathf.Abs(openAngle);
+                if (span < 1f)
+                    return true;
+                return Mathf.Abs(angle) >= span * 0.7f;
+            }
+        }
+
+        public Vector3 PanelCenter => panelCollider != null ? panelCollider.bounds.center : transform.position;
 
         void Awake()
         {
             closedRotation = transform.localRotation;
             unlocked = requiredKey == ItemId.None && !sealedUntilForced;
+            panelCollider = GetComponentInChildren<Collider>();
+        }
+
+        public float DistanceFrom(Vector3 point)
+        {
+            if (panelCollider == null)
+                return Vector3.Distance(point, transform.position);
+            return Vector3.Distance(point, panelCollider.ClosestPoint(point));
+        }
+
+        /// <summary>
+        /// Opens an unlocked door without the player's key message. Does nothing if it is locked.
+        /// </summary>
+        public void OpenForMonster()
+        {
+            if (!AllowsMonsterThrough)
+                return;
+            if (Mathf.Abs(targetAngle) > 1f)
+                return;
+            SwingOpen(playCreak: true);
         }
 
         void Update()

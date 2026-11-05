@@ -78,4 +78,5 @@ These were generated in Python (mono, 22050 Hz, 16-bit PCM). They are not record
 | --- | --- |
 | `slot_fill.wav` | A short chime when a relic fills a slot on the front door. Pitch rises a little with each slot. |
 | `ambient_mansion.wav` | A quiet drone with two dull ticks, looped in 2D on the Audio object. |
+| `scare_sting.wav` | A short dissonant hit when the creature catches you. |
 | `lock_rattle.wav` | A wrong item in a lock, or a locked door. Synthesized in grayboxgalore and copied here. |

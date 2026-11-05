@@ -27,6 +27,7 @@ namespace GrayBoxMansion
         [SerializeField] AudioClip[] lockUnlock;
         [SerializeField] AudioClip lockRattle;
         [SerializeField] AudioClip slotFill;
+        [SerializeField] AudioClip scareSting;
 
         AudioSource[] voices;
         int nextVoice;
@@ -127,6 +128,11 @@ namespace GrayBoxMansion
         {
             float pitch = 1f + Mathf.Clamp(filledCount - 1, 0, 3) * 0.07f;
             Play(slotFill, position, 0.62f, 0.35f, 0.01f, pitch);
+        }
+
+        public void PlayScare()
+        {
+            Play(scareSting, transform.position, 0.9f, 0f, 0.01f);
         }
 
         public void PlayAt(AudioClip clip, Vector3 position, float volume = 1f, float spatialBlend = 1f)

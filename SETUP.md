@@ -16,9 +16,9 @@ The mansion is not saved in the project until you build it. An editor script cre
 6. When the dialog says the mansion is built, you are looking at `Assets/Scenes/Mansion`. It is also added to **File → Build Settings**.
 7. Click **Play**, then click the Game view once so the mouse and keyboard reach the game.
 
-You start in the foyer, looking at the front door. The house is lit by a few warm lamps. Corners are dark on purpose.
+You start in the foyer, looking at the front door. The house is lit by a few warm lamps. Corners are dark on purpose. A limping creature is already upstairs. It does not know where you are until it sees you.
 
-Running the menu again replaces `Assets/Scenes/Mansion`. It does not delete the scripts.
+Running the menu again replaces `Assets/Scenes/Mansion`. It does not delete the scripts. Rebuild after pulling this change. An older saved mansion has no creature.
 
 ## Controls
 
@@ -55,6 +55,29 @@ The front door lock has four slots. Each relic fills one slot, in any order. Not
 8. Stand at the front door and look at the lock. Select a relic (number keys or the scroll wheel) and press E. Do that for all four. The door opens, and the screen says **You escaped**. **Play Again** reloads the mansion. R does the same.
 
 You can close a door you opened. It stays unlocked. Keys are not used up.
+
+## The creature
+
+It is a graybox body made of boxes when you press Play, not a downloaded character. One leg is shorter. That limp stays while it wanders and while it hurries.
+
+It patrols rooms and halls on both floors, including the stairs. It opens unlocked doors that are in its way. It does not open locked doors, and it does not open the front door, so it cannot skip the relic puzzle for you.
+
+It notices you only with its eyes: a cone in front of it, and a clear line that walls, floors, and closed doors block. Breaking that line makes it walk to the last place it saw you, wait, then go back to patrol. It does not track you through the house.
+
+| Pace | Speed |
+| --- | --- |
+| Creature patrol | 2.6 m/s |
+| Your walk | 4.4 m/s |
+| Creature chase | 5.5 m/s |
+| Your sprint | 7 m/s |
+
+Walking straight away, it gains on you. Sprinting straight away, you gain on it. Corners and doors still cost time.
+
+It starts on the upstairs hall and ignores you for 8 seconds, so the game does not kill you on the first frame. After that, if it reaches you, the view shakes, the screen says **Game Over**, and **Try Again** (or R) reloads the mansion. The relics, keys, and creature all start over.
+
+Select **Monster** in the hierarchy to change patrol speed, chase speed, view angle, view distance, how long it searches, and the 8 second delay. If you raise your walk or sprint on **Player → First Person Controller**, change the creature to match the rule above, then play again. Those numbers are stored in the scene when you build it.
+
+A fair test: build the scene, press Play, take the flashlight, go upstairs after the delay, let it see you, walk away (it should close), then sprint down a hall (you should open the gap). Step behind a closed door or a corner and it should come to that spot and give up. Do not expect extra hiding spots in this version.
 
 ## The house
 
